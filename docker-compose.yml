@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+  gestionCoupon:
+    build:  ./Coupon
+    image: omaramira/coupon
+    container_name: coupon-service
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+  
+  livraison:
+    build:  .\livraison
+    image:  omaramira/livraison
+    container_name: livraison
+    ports:
+      - "8089:8089"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/jobTest?createDatabaseIfNotExist=true&useSSL=false&max_allowed_packet=15728640
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      - eureka-server
+       - db-mysql
+
+  db-mysql:
+    image: "mysql:5.6"
+    container_name: db-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+  eureka-server:
+    build: .\eurukaServer
+    image: omaramira/eureka
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+  api-gateway:
+    build: .\api-Gatway
+    image: omaramira/apigateway
+    container_name: apigateway
+    ports:
+      - "8009:8009"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - candidat
+      - job
